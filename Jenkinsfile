@@ -1,26 +1,12 @@
-pipeline {
-    agent {
-        docker {
-            image 'maven:3-alpine'
-            args '-v /root/.m2:/root/.m2'
-        }
-    }
-    stages {
+node {
+    withDockerContainer(args: '-v /root/.m2:/root/.m2', image: 'maven:3-alpine') {
         stage('Build') {
-            steps {
-                sh 'mvn -B -DskipTests clean package'
-            }
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: '/home/Documents/Belajar_Implementasi_CICD/Jenkins/simple-java-maven-app']]])
+            sh 'mvn clean package'
         }
         stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: '/home/Documents/Belajar_Implementasi_CICD/Jenkins/simple-java-maven-app']]])
+            sh 'mvn test'
         }
-
     }
 }
